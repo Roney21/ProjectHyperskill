@@ -7,4 +7,6 @@ public interface Contact {
     String getTimeCreated();
     void setTimeEdit(LocalDateTime editedTime);
     String getTimeEdit();
+
+    String getFullname();
 }

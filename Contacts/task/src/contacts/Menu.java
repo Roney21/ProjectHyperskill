@@ -1,20 +1,16 @@
 package contacts;
 
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Menu {
 
     PersonFactory pf = new PersonFactory();
     OrganizationFactory of = new OrganizationFactory();
-
-
 
 
     List<Contact> contacts = new ArrayList<>();
@@ -25,32 +21,92 @@ public class Menu {
                             Pattern.CASE_INSENSITIVE);
 
     public void menu_init() {
-        System.out.println("\nEnter action (add, remove, edit, count, info, exit):");
-        switch (sc.nextLine()) {
+        System.out.println("\n[menu] Enter action (add, list, search, count, exit):");
+        String choice = sc.nextLine();
+        switch (choice) {
             case "add":
                 add();
                 menu_init();
                 break;
-            case "remove":
+            case "search":
+                search();
+//                menu_init();
+                break;
+            case "list":
+                list();
+//                menu_init();
+                break;
+            /*case "remove":
                 remove();
                 menu_init();
-                break;
-            case "edit":
+                break;*/
+            /*case "edit":
                 edit();
                 menu_init();
-                break;
+                break;*/
             case "count":
                 count();
                 menu_init();
                 break;
-            case "info":
+            /*case "info":
                 info();
                 menu_init();
-                break;
+                break;*/
             case "exit":
                 break;
         }
     }
+
+    void search() {
+        System.out.println("Enter search query:");
+        String searchLine = sc.nextLine();
+        boolean isEnd = false;
+        int count = 0;
+        List<Contact> searchCont = new ArrayList<>();
+        for (Contact contact : contacts) {
+            if (contact.toString().toLowerCase().contains(searchLine.toLowerCase())) {
+                count++;
+                searchCont.add(contact);
+            }
+        }
+        System.out.println("Found " + count + " results:");
+        for (int i = 0; i < searchCont.size(); i++) {
+            System.out.println(i + 1 + ". " + searchCont.get(i).getFullname());
+        }
+        System.out.println("[search] Enter action ([number], back, again):");
+        String action = sc.nextLine();
+        switch (action) {
+            case "back":
+                menu_init();
+                break;
+            case "again":
+                search();
+                break;
+            default:
+                info(searchCont.get(Integer.parseInt(action) - 1));
+                while (!isEnd) {
+                    System.out.println("[record] Enter action (edit, delete, menu):");
+                    String toDo = sc.nextLine();
+                    switch (toDo) {
+                        case "edit":
+                            edit(searchCont.get(Integer.parseInt(action) - 1));
+                            break;
+                        case "menu":
+                            isEnd = true;
+                            menu_init();
+                            break;
+                        case "delete":
+                            remove(searchCont.get(Integer.parseInt(action) - 1));
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+                break;
+        }
+    }
+
 
     private String validateNumber(String number) {
         if (number != null && number.matches(p.pattern()))
@@ -95,18 +151,14 @@ public class Menu {
 
     }
 
-    public void remove() {
+    private void remove(Contact contact) {
         if (!contacts.isEmpty()) {
-            list();
-            System.out.println("Select a record:");
-            int choice = sc.nextInt() - 1;
-            contacts.remove(choice);
-            System.out.println("The record removed!");
-            list();
-        } else System.out.println("No records to remove");
+            contacts.remove(contact);
+        }
     }
 
     public void list() {
+        boolean isEnd = false;
         for (int i = 0; i < contacts.size(); i++) {
             if (contacts.get(i) instanceof Person) {
                 System.out.println(i + 1 + ". " + ((Person) contacts.get(i)).getName()
@@ -115,85 +167,105 @@ public class Menu {
                 System.out.println(i + 1 + ". " + ((Organization) contacts.get(i)).getName());
             }
         }
+        System.out.println("\n[list] Enter action ([number], back):");
+        String choice = sc.nextLine();
+        switch (choice) {
+            case "back":
+                menu_init();
+                break;
+            default:
+                info(contacts.get(Integer.parseInt(choice) - 1));
+                while (!isEnd) {
+                    System.out.println("\n[record] Enter action (edit, delete, menu):");
+                    String toDo = sc.nextLine();
+                    switch (toDo) {
+                        case "edit":
+                            edit(contacts.get(Integer.parseInt(choice) - 1));
+                            break;
+                        case "menu":
+                            isEnd = true;
+                            menu_init();
+                            break;
+                        case "delete":
+                            remove(contacts.get(Integer.parseInt(choice) - 1));
+                            break;
+                    }
+                }
+
+
+        }
     }
 
-    public void edit() {
+    private void edit(Contact contact) {
         if (contacts.isEmpty()) {
             System.out.println("No records to edit");
             return;
         }
-        list();
-        System.out.println("Select a record:");
-        int choice = Integer.parseInt(sc.nextLine()) - 1;
 
-        if (contacts.get(choice) instanceof Person) {
+        if (contact instanceof Person) {
             System.out.println("Select a field (name, surname, birth, gender, number):");
             switch (sc.nextLine()) {
                 case "name":
                     System.out.println("Enter name:");
                     String newName = sc.nextLine();
-                    ((Person) contacts.get(choice)).setName(newName);
+                    ((Person) contact).setName(newName);
                     break;
                 case "surname":
                     System.out.println("Enter surname:");
                     String newSurname = sc.nextLine();
-                    ((Person) contacts.get(choice)).setSurName(newSurname);
+                    ((Person) contact).setSurName(newSurname);
                     break;
                 case "birth":
                     System.out.println("Enter birth date:");
                     String newBirthdate = sc.nextLine();
-                    ((Person) contacts.get(choice)).setBirthDate(newBirthdate);
+                    ((Person) contact).setBirthDate(newBirthdate);
                     break;
                 case "gender":
                     System.out.println("Enter gender:");
                     String newGender = sc.nextLine();
-                    ((Person) contacts.get(choice)).setGender(newGender);
+                    ((Person) contact).setGender(newGender);
                     break;
                 case "number":
                     System.out.println("Enter number:");
                     String newNumber = validateNumber(sc.nextLine());
-                    ((Person) contacts.get(choice)).setNumber(newNumber);
+                    ((Person) contact).setNumber(newNumber);
                     break;
             }
 
-        } else if (contacts.get(choice) instanceof Organization) {
+        } else if (contact instanceof Organization) {
             System.out.println("Select a field (name, number, address):");
             switch (sc.nextLine()) {
                 case "name":
                     System.out.println("Enter name:");
                     String newName = validateNumber(sc.nextLine());
-                    ((Organization) contacts.get(choice)).setName(newName);
+                    ((Organization) contact).setName(newName);
                     break;
                 case "number":
                     System.out.println("Enter number:");
                     String newNumber = sc.nextLine();
-                    ((Organization) contacts.get(choice)).setNumber(newNumber);
+                    ((Organization) contact).setNumber(newNumber);
                     break;
                 case "address":
                     System.out.println("Enter address:");
                     String newAddress = sc.nextLine();
-                    ((Organization) contacts.get(choice)).setAddress(newAddress);
+                    ((Organization) contact).setAddress(newAddress);
                     break;
             }
 
         }
-        contacts.get(choice).setTimeEdit(LocalDateTime.now());
-        System.out.println("The record updated!");
+        contact.setTimeEdit(LocalDateTime.now());
     }
 
-    public void info() {
-        list();
+    public void info(Contact contact) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
-        System.out.println("Select a record:");
-        int choice = Integer.parseInt(sc.nextLine()) - 1;
-        String tCreate = contacts.get(choice).getTimeCreated();
-        String tEdit = contacts.get(choice).getTimeEdit();
+        String tCreate = contact.getTimeCreated();
+        String tEdit = contact.getTimeEdit();
         LocalDateTime ldt = LocalDateTime.parse(tCreate);
         LocalDateTime ldt2 = LocalDateTime.parse(tEdit);
-        System.out.println(contacts.get(choice).toString());
-        System.out.println("Time created: "+ ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
-        System.out.println("Time last edit: "+ldt2.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+        System.out.println(contact);
+        System.out.println("Time created: " + ldt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
+        System.out.println("Time last edit: " + ldt2.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm")));
 
     }
 /*

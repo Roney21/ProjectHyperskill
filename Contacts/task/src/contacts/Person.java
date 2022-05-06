@@ -12,6 +12,10 @@ public class Person implements Contact {
     LocalDateTime createdTime = LocalDateTime.now();
     LocalDateTime editedTime = createdTime;
 
+    @Override
+    public String getFullname() {
+        return name+" "+surName;
+    }
 
     @Override
     public String getTimeCreated() {

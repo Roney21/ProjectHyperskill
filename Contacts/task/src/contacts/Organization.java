@@ -2,13 +2,18 @@ package contacts;
 
 import java.time.LocalDateTime;
 
-public class Organization implements Contact{
+public class Organization implements Contact {
     private String name;
     private String address;
     private String number;
 
     LocalDateTime createdTime = LocalDateTime.now();
     LocalDateTime editedTime = createdTime;
+
+    @Override
+    public String getFullname() {
+        return name;
+    }
 
     @Override
     public String getTimeCreated() {
@@ -53,7 +58,7 @@ public class Organization implements Contact{
     public String toString() {
         return
                 "Organization name: " + name + '\n' +
-                "Address: " + address + '\n' +
-                "Number: " + number;
+                        "Address: " + address + '\n' +
+                        "Number: " + number;
     }
 }
